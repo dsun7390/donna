@@ -1,5 +1,4 @@
-# CS74-1-2023S1
-
+# CS5703-02
 ## Installation and Run
 
 ### Backend
