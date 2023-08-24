@@ -384,10 +384,10 @@ h3 {
 .popup {
   position: absolute;
 
-  z-index: 1001s;
+  z-index: 200;
   display: none;
 
-  width: 300px;
+  width: 250px;
   margin: 0 auto;
   border: 2px solid #566370;
   border-radius: 8px;
