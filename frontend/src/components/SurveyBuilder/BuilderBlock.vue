@@ -384,7 +384,7 @@ h3 {
 .popup {
   position: absolute;
 
-  z-index: 2;
+  z-index: 1001s;
   display: none;
 
   width: 300px;
