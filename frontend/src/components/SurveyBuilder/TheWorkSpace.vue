@@ -131,6 +131,7 @@ html:lang(ur) * {
   flex-wrap: nowrap;
   padding: 16px;
   align-items: center;
+  padding-top: 50px;
 }
 
 .button-row {
