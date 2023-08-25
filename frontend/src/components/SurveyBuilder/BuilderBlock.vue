@@ -387,7 +387,7 @@ h3 {
   z-index: 1001;
   display: none;
 
-  width: 300px;
+  width: 250px;
   margin: 0 auto;
   border: 2px solid #566370;
   border-radius: 8px;
