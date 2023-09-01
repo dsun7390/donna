@@ -113,6 +113,18 @@ WSGI_APPLICATION = 'django_core.wsgi.application'
 #     }
 # }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cs37',
+        'USER': 'doadmin',
+        'PASSWORD': 'AVNS_RFckQg8MzfG1lU_dBDt',
+        'HOST': 'db-postgresql-cs37-2-do-user-14528673-0.b.db.ondigitalocean.com',
+        'PORT': '25060',
+        'OPTIONS': {'sslmode': 'require'},
+    }
+}
+
 # group cs06-1 cloud database from digitalocean
 # DATABASES = {
 #     'default': {
@@ -138,16 +150,16 @@ WSGI_APPLICATION = 'django_core.wsgi.application'
 # }
 
 # Local database
-DATABASES = {
-    'default': {
-		    'ENGINE': 'django.db.backends.postgresql',
-				'NAME': 'postgres',
-				'USER': 'postgres',
-				'PASSWORD': '',
-		    'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+# DATABASES = {
+#   'default': {
+#		    'ENGINE': 'django.db.backends.postgresql',
+#				'NAME': 'postgres',
+#				'USER': 'postgres',
+#				'PASSWORD': '',
+#		    'HOST': 'localhost',
+#        'PORT': '5432',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
