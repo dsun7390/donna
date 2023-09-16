@@ -22,16 +22,16 @@ import lottie from 'vue-lottie'
 Vue.component('lottie', lottie)
 
 import VueCountdown from '@chenfengyuan/vue-countdown'
-import $ from 'jquery'
-
+import jquery from 'jquery'
 // Vue.use(DatePicker);
 Vue.component(VueCountdown.name, VueCountdown)
-Vue.use($)
+// Vue.use($)
 
 Vue.use(VueClipboard)
 Vue.use(ElementUI, { locale })
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
+Vue.prototype.$ = jquery
 Vue.use(vueRouter)
 Vue.use(VueSweetalert2)
 library.add(fas)

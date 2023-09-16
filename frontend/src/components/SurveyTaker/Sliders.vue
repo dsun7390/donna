@@ -156,6 +156,7 @@ export default {
       e.stopPropagation()
     },
     sliderChange(e, s) {
+      this.sendResult()
       console.log(e, s)
     },
     slidersSpanMethod({ row, column, rowIndex, columnIndex }) {

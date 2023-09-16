@@ -24,3 +24,10 @@ if (process.env.VUE_APP_ENV !== 'development') {
   axios.defaults.baseURL = process.env.VUE_APP_SERVER
   axios.defaults.url = process.env.VUE_APP_WEBSITE
 }
+
+// const webpack = require('webpack')
+// module.exports = {
+//   chainWebpack:config=>{
+//     config.plugin('provide').use(webpack.ProvidePlugin),[{$:'jquery',jQuery:'jquery',jquery:'jquery','window.jquery':'jquery'}]
+//   }
+// }

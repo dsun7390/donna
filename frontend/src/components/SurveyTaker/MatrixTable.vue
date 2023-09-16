@@ -139,6 +139,7 @@ export default {
           }
         }
       }
+      this.sendResult()
       this.$set(this.matrixChecked, s + c, e)
     },
     checkImg() {

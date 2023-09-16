@@ -27,7 +27,7 @@ def get_youtube_video_info(video_url):
     video_id = video_url.split("v=")[1]
 
     # Request to YouTube API
-    api_key = "AIzaSyAcSrMwF6KK3AGFrirOVwg7OH5aZsPvriE"
+    api_key = "AIzaSyBL8GLqzSb4ORxA49WfoAwIKF3MHooxEho"
     api_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id={video_id}&key={api_key}"
     response = requests.get(api_url)
     data = json.loads(response.text)

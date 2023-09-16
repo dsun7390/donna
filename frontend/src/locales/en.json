@@ -388,7 +388,8 @@
     "seconds": " seconds ",
     "tips": "Tips:",
     "tipHint": "Please select at least one button.",
-    "Items": "Items"
+    "Items": "Items",
+    "nexttip":"unanswered"
   },
   "surveyStatistic": {
     "minTime": "Min Time",

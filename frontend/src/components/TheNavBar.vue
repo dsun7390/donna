@@ -79,7 +79,7 @@ nav {
   background-color: #566370;
 
 
-  position: sticky;
+ position: sticky;
   top: 0;
   z-index: 100;
 }

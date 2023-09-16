@@ -13,7 +13,6 @@ export default {
 </script>
 
 <template>
-  <body>
     <div id="app">
       <TheNavBar2 v-if="$route.name === 'surveytaker'"></TheNavBar2>
       <TheNavBar
@@ -28,7 +27,6 @@ export default {
         "
       />
     </div>
-  </body>
 </template>
 
 <style scoped>

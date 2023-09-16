@@ -13,7 +13,7 @@
       
       <Draggable v-for="(choice, index) in rankList" :key="choice.id" :draggable="true">
         <div class="draggable-input" type="text" style="word-wrap: normal;">
-          {{ index + 1 }}. {{ choice.text }}
+          {{ index + 1 }}. {{ choice.text }} 
         </div>
       </Draggable>
 
@@ -104,6 +104,7 @@ export default {
         return e
       })
       this.rankList = ch
+      this.sendResult()
       this.checkValidity()
       // ch.forEach((el) => {
       //   console.log(el)

@@ -11,6 +11,7 @@
         v-for="(item, index) in randomQuestions"
         :key="randomQuestions.id"
         class="question"
+        :id="'question' + item.id"
       >
         <RankOrder
           v-if="item.type === 'Rank order'"
@@ -126,6 +127,7 @@ export default {
     }
   },
   methods: {
+    // 所有子组件更新会调用此方法  子组件内具体触发此方法地方自己全局搜一下就好
     updateQuestion(data, index) {
       // console.log('updateQuestion ', data)
       this.answerData.response_questions[index] = data
@@ -149,8 +151,7 @@ export default {
       }
       this.answerData.createTime = this.createTime
       this.answerData.endTime = this.endTime
-
-      this.$emit('updateBlock', this.answerData, this.blockIndex)
+      this.$emit('updateBlock', this.answerData, this.blockIndex, data)
     },
     updateJumpBlockId(id) {
       this.jumpBlockId = id
@@ -198,7 +199,8 @@ export default {
         }
       }
     )
-    this.randomQuestions.sort(() => Math.random() - 0.5)
+    // 此处注释因为此段代码会引起乱序
+    // this.randomQuestions.sort(() => Math.random() - 0.5)
     // console.log('RANDOM QUESTIONS: ', this.randomQuestions)
   },
   mounted() {

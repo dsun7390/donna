@@ -99,7 +99,7 @@ export default {
     },
 
     checkValidity() {
-      this.sendResult()
+      // this.sendResult()
       if (this.questionData.required === true && this.checked.length != 0) {
         console.log(true)
         this.changeColor(true)

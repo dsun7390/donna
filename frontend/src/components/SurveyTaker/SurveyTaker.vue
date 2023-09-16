@@ -67,7 +67,7 @@
           <countdown :time="this.duration" @progress="handleCountdownProgress">
             <template slot-scope="props"
               >{{
-                $t('surveyTaker.Time Remaining: ') +
+                $t('surveyTaker.Time Running: ') +
                 props.hours +
                 $t('surveyTaker.hours') +
                 props.minutes +
@@ -77,6 +77,43 @@
               }}
             </template>
           </countdown>
+        </div>
+      </div>
+      <!--  答题右上角模块  -->
+      <div class="question-progress-container">
+        <div class="question-title">Questions</div>
+        <!-- 存放题目block的容器 通过v-for循环模块 -->
+        <div class="block-container">
+         <div  v-for="(block, index) in sortedBlocks" :key="index" class="rank-block">
+          <div> Part {{ index + 1 }} </div>
+          <!-- 每一个block单独循环  展示所有题目数量 -->
+             <div v-for="(questionItem,questionIndex) in block.questionData.questions" class="block-item" :key="questionIndex" :class="currentAnsweredList.includes(questionItem.id) ? 'active' : ''" @click="handleRankClick(questionItem,block)"> 
+              <i class="el-icon-success" style="color:#67C23A"  v-if="currentAnsweredList.includes(questionItem.id)"></i>
+              <i class="el-icon-warning" v-else></i> 
+              <!-- 题目序号通过本身下标加上当前block长度展示 -->
+               Qusetion {{ (questionIndex + 1) + getRankOrder(index) }} 
+             </div>
+         </div>
+         </div>
+         <!-- 进度条容器  具体属性可在elementui官网对照看  -->
+         <div style="width:90%;">
+          <el-progress :text-inside="true" :stroke-width="20" color="#67C23A" :percentage="currentPercent" :format="setProgressText" text-color="#ffffff" status="success"></el-progress>
+         </div>
+         <!-- 倒计时容器 -->
+        <div style="margin-top:10px;">
+          {{
+              $t('Time Running: ') 
+          }}
+        </div>
+         <div style="margin-top:10px;">
+          {{
+                currentHour +
+                $t('surveyTaker.hours') +
+                currentMinutes +
+                $t('surveyTaker.minutes') +
+                currentSeconds +
+                $t('surveyTaker.seconds')
+              }}
         </div>
       </div>
       <div class="block-segment" v-for="(block, index) in sortedBlocks">
@@ -141,6 +178,7 @@ import { mapGetters } from 'vuex'
 import Cookies from 'js-cookie'
 
 import webgazer from 'webgazer'
+import moment from 'moment'
 
 export default {
   name: 'SurveyTaker',
@@ -148,6 +186,17 @@ export default {
   components: { Block },
   computed: {
     ...mapGetters(['surveyTitle', 'sortedBlocks', 'wholeSurvey']),
+    // 获取所有题目数量  用于计算进度条百分比
+    progressTotal() { // 题目总数
+      return this.sortedBlocks.reduce((prev,next) => {
+        return prev += next?.questionData?.questions.length
+      },0)
+    },
+    // 计算进度条百分比
+    currentPercent() {
+      let rate = ((this.currentAnsweredList.length / this.progressTotal) * 100).toFixed(0)
+      return +rate
+    }
   },
   data() {
     return {
@@ -217,9 +266,17 @@ export default {
       if_camera_open: false,
       avgAccuracy: 0,
       accuracies: [],
+      updateCount:0,
+      currentAnsweredList:[],
+      currentHour:0,
+      currentMinutes:0,
+      currentSeconds:0,
+      allTime:0,
+      stayTimer:null
     }
   },
   mounted() {
+    this.calculateStayTime()
     document.addEventListener('visibilitychange', this.handleVisiable)
     // window.addEventListener('beforeunload', e => this.beforeunloadHandler(e),false)
     // window.addEventListener('unload', e => this.unloadHandler(e))
@@ -245,9 +302,18 @@ export default {
       this.handleCloseCookie()
     })
     window.removeEventListener('popstate', this.goBack, false)
+    this.stayTimer && clearInterval(this.stayTimer)
   },
 
   methods: {
+    calculateStayTime() {
+      this.stayTimer = setInterval(() => {
+        this.allTime += 1000
+        this.currentHour = moment.duration(this.allTime).hours()
+        this.currentMinutes = moment.duration(this.allTime).minutes()
+        this.currentSeconds = moment.duration(this.allTime).seconds()
+      },1000)
+    },
     handleCountdownProgress(data) {
       // console.log(data.totalSeconds)
       sessionStorage.setItem(`${this.wholeSurvey.id}`, data.totalSeconds * 1000)
@@ -356,8 +422,18 @@ export default {
         })
       }
     },
-    updateBlock(data, index) {
+    updateBlock(data, index,currentChangeData ={ question_id:null}) {
+      console.log('currentChangeData===',currentChangeData);
+      // currentChangeData 此字段为当前更改内容
+      // this.updateCount定义此此变量是因为所有答题子组件在初始化页面是都会更新操作
+      this.updateCount++
+      // 更改内容赋值
       this.answer.response_blocks[index] = data
+      // 判断初始化之后更新操作条件
+      // 当前更改项必须有question_id 且之前没有加入已答题数组currentAnsweredList 则添加进入已答题数组
+      if(this.updateCount > this.progressTotal && currentChangeData.question_id &&  !this.currentAnsweredList.includes(currentChangeData.question_id)){
+        this.currentAnsweredList.push(currentChangeData.question_id)
+      }
     },
     updateJumpBlockId(id) {
       this.jumpBlockId = id
@@ -377,10 +453,16 @@ export default {
     },
     async submit() {
       const h = this.$createElement
+      let unansweredCount = this.progressTotal - this.currentAnsweredList.length
       this.$confirm('', {
         message: h('div', null, [
           h('i', { class: 'el-icon-question' }),
           h('span', { class: 'hint-title' }, this.$t('surveyTaker.Hint')),
+           h(
+            'p',
+            { class: 'hint-content' },
+            `You still have ${unansweredCount} questions unfinished`
+          ),
           h(
             'p',
             { class: 'hint-content' },
@@ -403,6 +485,7 @@ export default {
               message: this.$t('surveyTaker.Submit successfully'),
               type: 'success',
             })
+            this.stayTimer && clearInterval(this.stayTimer)
             await this.$router.push(`/success`)
             console.log('Submit answer: ' + this.answer)
           }
@@ -460,6 +543,7 @@ export default {
         type: 'success',
       })
       Cookies.set(this.$route.params.code + 'Success', true)
+      this.stayTimer && clearInterval(this.stayTimer)
       this.$router.push(`/success`)
     },
 
@@ -503,6 +587,7 @@ export default {
       return true
     },
     previousQuestion(index) {
+      
       this.setGazeToCurrentBlock()
       this.setClickToCurrentBlock()
       this.showIndex.splice(this.currentShowIndex + 1)
@@ -536,6 +621,44 @@ export default {
       this.touchEvent = []
     },
     nextQuestion(index) {
+      // // 翻页未答题操作
+      //  const h = this.$createElement
+      //   // 获取当前页面所有题目数量
+      //   let currentBlockLen = this.sortedBlocks[index].questionData.questions.length
+      //   // 获取当前页题目内容
+      //   let currentBlockList = this.sortedBlocks[index].questionData.questions
+      //   // 声明已答题数量
+      //   let answerCount = 0
+      //   // 遍历已答题数组与当前页面数组 获取已答题在单页个数
+      //  this.currentAnsweredList.forEach(item => {
+      //     let result = currentBlockList.find(subItem => {
+      //       return subItem.id === item
+      //     })
+      //     if (result) {
+      //       answerCount++
+      //     }
+      //  })
+      //  // 总数 —— 已答题 = 未答题
+      //  let unansweredCount = currentBlockLen - answerCount
+      //  if (unansweredCount > 0) {
+      //   // TODO 注意此处需要做多语言处理
+      //   this.$confirm('', {
+      //     message: h('div', null, [
+      //     h('i', { class: 'el-icon-question' }),
+      //     h('span', { class: 'hint-title' }, this.$t('surveyTaker.Hint')),
+      //     h(
+      //       'p',
+      //       { class: 'hint-content' },
+      //       `剩余${unansweredCount}道题${this.$t('surveyTaker.nexttip')}，是否跳转`
+         
+      //     ),
+      //     ]),
+      //     confirmButtonText: this.$t('surveyTaker.Confirm'),
+      //     cancelButtonText: this.$t('surveyTaker.Cancel'),
+      //     closeOnClickModal: false,
+      //     closeOnPressEscape: false,
+      //   })
+      //  }
       this.setGazeToCurrentBlock()
       this.setClickToCurrentBlock()
       this.showIndex.splice(this.currentShowIndex + 1)
@@ -781,6 +904,36 @@ export default {
         }
       } catch (error) {}
     },
+    // 按照block下标 展示对应题目序号
+    getRankOrder(order){
+      let len = 0
+      if (order <= 0) {
+        return 0
+      }
+      for (let index = 0; index < order; index++) {
+          len += this.sortedBlocks[index].questionData.questions.length  
+      }
+      return len
+    },
+    // 点击题目进行定位题目操作
+    handleRankClick(item,block) {
+      // return
+      // 因为涉及到翻页操作  需先判断当前页有无点击题目id 如果没有则对应翻页至对应页码
+      if (this.currentId !== block.id) {
+        this.currentId = block.id
+      }
+      this.$nextTick(() => {
+        // 获取当前选中题目的dom元素调用滚动api
+        const orderId = 'question' + item.id
+      const selectedEl = document.getElementById(orderId)
+      selectedEl && selectedEl.scrollIntoView()
+      })
+    },
+    // 设置进度条内容
+    setProgressText(percent){
+      // 当前已答题数量   总数  进度值
+       return this.currentAnsweredList.length + '/' + this.progressTotal + ' ' + percent + '%'
+    }
   },
   async created() {
     if (this.$route.params.code != null) {
@@ -806,6 +959,7 @@ export default {
           message: 'You have already submitted the survey',
           type: 'success',
         })
+        this.stayTimer && clearInterval(this.stayTimer)
         this.$router.push(`/success`)
       }
       this.submitFlag = true
@@ -1069,6 +1223,63 @@ export default {
   position: absolute;
   top: 70px;
   left: 2vw;
+}
+.question-progress-container{
+  position: fixed;
+  right: 20px;
+  top: 150px;
+  width: 280px;
+  height: 500px;
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+.block-container{
+  height: 280px;
+  overflow: auto;
+  margin: 8px 0;
+}
+ .block-container::-webkit-scrollbar{
+        width:10px;
+        height:10px;
+        /**/
+  }
+  .block-container::-webkit-scrollbar-track{
+    background: rgb(239, 239, 239);
+    border-radius:2px;
+  }
+  .block-container::-webkit-scrollbar-thumb{
+    background: #bfbfbf;
+    border-radius:10px;
+  }
+  .block-container::-webkit-scrollbar-thumb:hover{
+    background: #333;
+  }
+  .block-container::-webkit-scrollbar-corner{
+    background: #179a16;
+  }
+
+.question-title{
+  font-size: 18px;
+  font-weight: 600;
+}
+.rank-block{
+  padding: 0 30px;
+  margin-bottom: 10px;
+}
+.block-item{
+  padding: 0 30px;
+  cursor: pointer;
+  margin: 8px 0;
+}
+.block-item.active{
+  color:#67C23A;
+}
+::v-deep .el-progress-bar__innerText{
+  width: 234px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
 
