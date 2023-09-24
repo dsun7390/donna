@@ -154,7 +154,8 @@ export default {
   methods: {
     groupsDropFa(e) {
       console.log(e)
-      this.sendResult()
+      // debugger
+      // this.sendResult()
     },
     getChildPayload(itemIndex, type) {
       return { ...this.tableConfig[itemIndex - 1], type }

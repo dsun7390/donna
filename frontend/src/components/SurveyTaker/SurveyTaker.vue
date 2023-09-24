@@ -917,7 +917,8 @@ export default {
     },
     // 点击题目进行定位题目操作
     handleRankClick(item,block) {
-      // return
+      let index = this.sortedBlocks.findIndex(item => item.id === block.id) || 0
+      this.currentIndex = index
       // 因为涉及到翻页操作  需先判断当前页有无点击题目id 如果没有则对应翻页至对应页码
       if (this.currentId !== block.id) {
         this.currentId = block.id
